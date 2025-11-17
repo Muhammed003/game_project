@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Книжная детская игра — Сложение</title>
+  <style>
+  :root{
+    --bg:#f3f8ff; --card:#ffffff; --accent:#2b8cff; --muted:#6b7280; --success:#16a34a; --fail:#ef4444;
+    --book-shadow: 0 10px 30px rgba(19,38,84,0.12);
+  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,var(--bg),#e6f0ff);}
+  .container{max-width:980px;margin:28px auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap}
+  h1{font-size:20px;margin:0;color:#072146;text-align:center;width:100%}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .btn{background:var(--card);border:1px solid #e6eefc;padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--book-shadow);font-size:14px}
+  .btn--primary{background:linear-gradient(180deg,var(--accent),#1a6fe0);color:#fff;border:none}
+  .difficulty{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .difficulty .btn{padding:6px 10px;border-radius:8px;font-weight:600;font-size:13px}
+  .difficulty .btn.active{background:#fff;border:2px solid var(--accent);color:var(--accent)}
+
+  /* Book */
+  .book{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .page{width:640px;height:420px;background:var(--card);border-radius:16px;padding:22px;box-shadow:var(--book-shadow);position:relative;overflow:hidden;transition:width 0.3s,height 0.3s}
+  .left, .right{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e6eefc;cursor:pointer;font-size:18px}
+  .book-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+  /* Board inside page */
+  .board{background:linear-gradient(180deg,#eaf4ff,#dff0ff);height:100%;border-radius:12px;padding:18px;display:flex;flex-direction:column}
+  .top-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+  .problem{font-size:44px;font-weight:700;color:#08386b;text-align:center}
+  .subtitle{color:var(--muted);font-size:13px;text-align:center}
+
+  .center{flex:1;display:flex;align-items:center;justify-content:space-between;padding:12px;flex-wrap:wrap}
+  .oper{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:12px}
+  .sum-box{background:#fff;padding:16px;border-radius:12px;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #dbefff;flex-wrap:wrap}
+  .num{font-size:48px;font-weight:800;color:#09305a}
+  .equals{font-size:28px;color:#0b4272}
+
+  .options{display:flex;flex-direction:column;gap:8px;align-items:center;width:100%}
+  .shapes{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .shape{width:110px;height:84px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;cursor:pointer;user-select:none;box-shadow:0 6px 18px rgba(11,36,83,0.12);transition:transform .12s ease}
+  .shape:active{transform:translateY(3px)}
+  .shape.circle{border-radius:50%;background:#f59e0b}
+  .shape.triangle{clip-path:polygon(50% 0, 100% 100%, 0 100%);background:#10b981}
+  .shape.diamond{transform:rotate(45deg);background:#fb7185;width:80px;height:80px}
+  .shape.diamond > span{transform:rotate(-45deg);display:inline-block}
+
+  .footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;flex-wrap:wrap;text-align:center}
+  .score{font-weight:700;color:#06406b}
+  .message{min-height:24px;text-align:center;width:100%}
+
+  /* badges */
+  .badge{padding:6px 10px;border-radius:999px;background:#eef6ff;border:1px solid #d7eaff;color:#0b5ac6;font-weight:700}
+
+  /* small screens */
+  @media (max-width:720px){
+    .page{width:92vw;height:68vh;padding:12px}
+    .shape{width:84px;height:64px;font-size:22px}
+    .sum-box{min-width:160px;flex-direction:column;gap:4px}
+    .num{font-size:36px}
+    .equals{font-size:22px}
+    .top-row, .footer, .center{flex-direction:column;align-items:center}
+    .difficulty .btn{font-size:12px;padding:5px 8px}
+    .btn{font-size:13px;padding:6px 10px}
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Книжная игра: сложи числа</h1>
+      <div class="controls">
+        <div class="difficulty" aria-label="Выбор сложности">
+          <button class="btn active" data-diff="easy">Лёгкая</button>
+          <button class="btn" data-diff="normal">Нормальная</button>
+          <button class="btn" data-diff="hard">Сложная</button>
+        </div>
+        <div style="width:8px"></div>
+        <button class="btn btn--primary" id="newProblem">Новая задачa</button>
+      </div>
+    </header>
+
+    <div class="book">
+      <div class="left" id="prevPage">◀</div>
+      <div class="page" id="bookPage">
+        <div class="board">
+          <div class="top-row">
+            <div class="book-meta">
+              <div class="badge" id="pageLabel">Страница 1</div>
+              <div class="subtitle">Выберите правильную фигуру с ответом</div>
+            </div>
+            <div class="book-meta">
+              <div class="score">Правильно: <span id="correct">0</span></div>
+              <div style="width:8px"></div>
+              <div class="score">Ошибки: <span id="wrong">0</span></div>
+            </div>
+          </div>
+
+          <div class="center">
+            <div class="oper">
+              <div class="problem">Сложение</div>
+              <div class="sum-box" aria-live="polite">
+                <div class="num" id="a">1</div>
+                <div class="equals">+</div>
+                <div class="num" id="b">3</div>
+                <div class="equals">=</div>
+                <div class="num" id="q">?</div>
+              </div>
+            </div>
+
+            <div class="options">
+              <div class="shapes" id="shapesWrap">
+                <!-- shapes inserted by JS -->
+              </div>
+              <div class="message" id="message"></div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <div class="subtitle">Подсказка: уровни меняют диапазон чисел и количество отвлекающих вариантов.</div>
+            <div>
+              <button class="btn" id="flipPage">Перевернуть страницу 📖</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right" id="nextPage">▶</div>
+    </div>
+  </div>
+
+  <script>
+    // Game logic
+    const difficultyButtons = document.querySelectorAll('.difficulty .btn');
+    const newBtn = document.getElementById('newProblem');
+    const aEl = document.getElementById('a');
+    const bEl = document.getElementById('b');
+    const qEl = document.getElementById('q');
+    const shapesWrap = document.getElementById('shapesWrap');
+    const message = document.getElementById('message');
+    const correctEl = document.getElementById('correct');
+    const wrongEl = document.getElementById('wrong');
+    const pageLabel = document.getElementById('pageLabel');
+
+    let page = 1;
+    let score = 0, errs = 0;
+    let state = {diff: 'easy', a:1, b:3, answer:4, options:[], page:1};
+
+    function setDifficulty(name){
+      difficultyButtons.forEach(b=>b.classList.toggle('active', b.dataset.diff===name));
+      state.diff = name;
+    }
+
+    difficultyButtons.forEach(btn=>btn.addEventListener('click', ()=>{
+      setDifficulty(btn.dataset.diff);
+      generateProblem();
+    }));
+
+    function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+
+    function generateProblem(){
+      // difficulty affects range and number of options and type of distractors
+      let a,b;
+      let optsCount = 3; // easy 2 options? we'll keep 3 shapes
+      if(state.diff==='easy'){
+        a = randInt(0,3); b = randInt(0,4); // sums small
+      } else if(state.diff==='normal'){
+        a = randInt(1,7); b = randInt(1,7);
+      } else {
+        a = randInt(5,12); b = randInt(3,12);
+        optsCount = 4; // hard has 4 choices
+      }
+      const ans = a + b;
+      state.a = a; state.b = b; state.answer = ans; state.options = [];
+
+      // create alternatives — include one correct and others near or tricky
+      const used = new Set([ans]);
+      const options = [ans];
+    const range = state.diff==='easy'?3:(state.diff==='normal'?6:10);
+
+      while(options.length < optsCount){
+        // generate distractor with varying 'difficulty' of its creation
+        let d;
+        if(state.diff==='easy'){
+          // far random but small
+          d = ans + (Math.random()>0.6? randInt(-2,2) : randInt(-3,3));
+        } else if(state.diff==='normal'){
+          // closer distractors
+          d = ans + (Math.random()>0.5? randInt(-3,3) : randInt(-6,6));
+        } else {
+          // hard: include negative distractors, swapped digits
+          d = ans + (Math.random()>0.5? randInt(-4,4) : randInt(-8,8));
+        }
+        if(d<0) d = Math.abs(d) + randInt(0,2);
+        if(!used.has(d)) {options.push(d); used.add(d)}
+      }
+
+      // shuffle
+      for(let i=options.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[options[i],options[j]]=[options[j],options[i]]}
+      state.options = options;
+
+      renderProblem();
+    }
+
+    function renderProblem(){
+      aEl.textContent = state.a;
+      bEl.textContent = state.b;
+      qEl.textContent = '?';
+      shapesWrap.innerHTML = '';
+      // shapes types cycle
+      const shapeTypes = ['triangle','diamond','circle','triangle','diamond'];
+      state.options.forEach((val,i)=>{
+        const div = document.createElement('div');
+        const type = shapeTypes[i % shapeTypes.length];
+        div.className = 'shape ' + type;
+        // for diamond we need inner span rotated back
+        if(type==='diamond') div.innerHTML = '<span>'+val+'</span>'; else div.textContent = val;
+        // attach dataset difficulty of option (easy/normal/hard) based on how close to correct
+        const diffToAnswer = Math.abs(val - state.answer);
+        let optDifficulty = 'easy';
+        if(diffToAnswer<=1) optDifficulty='normal';
+        if(diffToAnswer===0) optDifficulty='correct';
+        if(diffToAnswer>4) optDifficulty='hard';
+        div.dataset.optDiff = optDifficulty;
+        div.dataset.value = val;
+        div.setAttribute('title', 'Ответ: '+val+' — уровень варианта: '+optDifficulty);
+        div.addEventListener('click', onPick);
+        shapesWrap.appendChild(div);
+      });
+      message.textContent = '';
+      pageLabel.textContent = 'Страница ' + page;
+    }
+
+    function onPick(e){
+      const val = Number(e.currentTarget.dataset.value);
+      const optDiff = e.currentTarget.dataset.optDiff;
+      // show difficulty note
+      message.innerHTML = 'Вы выбрали ответ ' + val + ' (уровень варианта: ' + optDiff + ')';
+
+      if(val === state.answer){
+        score++;
+        correctEl.textContent = score;
+        message.innerHTML += ' — <strong style="color:var(--success)">Верно!</strong>';
+        // show correct in q
+        qEl.textContent = val;
+        // subtle success animation
+        e.currentTarget.style.transform = 'scale(1.05)';
+        setTimeout(()=>{e.currentTarget.style.transform=''; nextPageAuto();},700);
+      } else {
+        errs++;
+        wrongEl.textContent = errs;
+        message.innerHTML += ' — <strong style="color:var(--fail)">Неверно</strong>';
+        // if hard distractor chosen, penalize (extra message)
+        if(optDiff === 'hard') message.innerHTML += ' — это сложный отвлекающий ответ.';
+        e.currentTarget.style.opacity = '0.6';
+        // do not advance immediately
+      }
+    }
+
+    function nextPageAuto(){
+      page++;
+      pageLabel.textContent = 'Страница ' + page;
+      // tiny page flip animation (simulate by rotateY)
+      const bookPage = document.getElementById('bookPage');
+      bookPage.style.transition = 'transform .35s ease';
+      bookPage.style.transform = 'rotateY(-12deg)';
+      setTimeout(()=>{bookPage.style.transform=''; generateProblem();},250);
+    }
+
+    document.getElementById('nextPage').addEventListener('click', ()=>{page++; pageLabel.textContent='Страница '+page; generateProblem();});
+    document.getElementById('prevPage').addEventListener('click', ()=>{page = Math.max(1,--page); pageLabel.textContent='Страница '+page; generateProblem();});document.getElementById('flipPage').addEventListener('click', ()=>{ // flip same page
+      const bookPage = document.getElementById('bookPage');
+      bookPage.style.transition = 'transform .6s ease';
+      bookPage.style.transform = 'rotateY(180deg)';
+      setTimeout(()=>{bookPage.style.transform='';},600);
+    });
+
+    newBtn.addEventListener('click', ()=>{generateProblem();});
+
+    // init
+    setDifficulty('easy');
+    generateProblem();
+
+    // keyboard shortcuts
+    window.addEventListener('keydown',(e)=>{
+      if(e.key === 'ArrowRight') document.getElementById('nextPage').click();
+      if(e.key === 'ArrowLeft') document.getElementById('prevPage').click();
+      if(e.key === 'n') generateProblem();
+    });
+  </script>
+</body>
+</html>

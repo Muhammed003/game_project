@@ -1,0 +1,82 @@
+{% extends '../main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+        background: #f2f4f7;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .menu-container {
+        max-width: 450px;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .menu-item {
+        background: white;
+        padding: 18px;
+        margin-bottom: 15px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        transition: 0.25s;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .menu-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    .menu-icon {
+        font-size: 28px;
+        color: #3f8cff;
+        width: 40px;
+        text-align: center;
+    }
+
+    .menu-text {
+        font-size: 19px;
+        font-weight: 600;
+        color: #333;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="menu-container">
+
+    <a href="{% url 'names-of-allah' %}" class="menu-item">
+        <i class="fa-solid fa-book-quran menu-icon"></i>
+        <div class="menu-text">Аллох исмлари</div>
+    </a>
+
+    <a href="{% url 'names-of-allah-audio' %}" class="menu-item">
+        <i class="fa-solid fa-headphones menu-icon"></i>
+        <div class="menu-text">Аудио ва исмлар</div>
+    </a>
+
+    <a href="#" class="menu-item">
+        <i class="fa-solid fa-chart-line menu-icon"></i>
+        <div class="menu-text">Хафталик отчёт бериш</div>
+    </a>
+
+    <a href="#" class="menu-item bg-secondary">
+        <i class="fa-solid fa-book-open menu-icon"></i>
+        <div class="menu-text">Дуолар ёдлаш</div>
+    </a>
+
+    <a href="#" class="menu-item  bg-secondary">
+        <i class="fa-solid fa-list-check menu-icon"></i>
+        <div class="menu-text">Вазифалар</div>
+    </a>
+
+</div>
+
+{% endblock content %}

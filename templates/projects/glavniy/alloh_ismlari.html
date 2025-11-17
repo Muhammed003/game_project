@@ -1,0 +1,11 @@
+{% extends '../../main/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Контейнер, который занимает всю высоту экрана минус шапка и меню -->
+<div class="iframe-container" style="position: relative; height: calc(100vh - 120px);">
+    <iframe src="https://docs.google.com/document/d/1UIfRLm6IgpfCYWEVmq3KWMumgIkUfzfMjGXaSAkt5o4/edit?tab=t.0#heading=h.p2j50xcv6jpr"
+            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;">
+    </iframe>
+</div>
+{% endblock content %}

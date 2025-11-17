@@ -1,0 +1,103 @@
+{% extends '../../main/base.html' %}
+{% load static %}
+
+{% block header %}
+<a href="{% url 'main' %}"><i class="fa-solid fa-arrow-left"></i></a>
+<div class="mx-auto text-dark">
+    Аудио
+</div>
+{% endblock header %}
+
+{% block content %}
+<div class="container my-3">
+
+    <!-- Кнопка открыть модальное окно -->
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#audioModal">
+            Добавить трек
+        </button>
+    </div>
+
+    <!-- Модальное окно формы -->
+    <div class="modal fade" id="audioModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ track.id|default:"Добавить новый трек" }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.author.label_tag }}
+                            {{ form.author }}
+                            {% if form.author.errors %}
+                                <div class="text-danger small">{{ form.author.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small">{{ form.title.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                              {{ form.number_of_name.label_tag }}
+                            {{ form.number_of_name }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.file.label_tag }}
+
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                                <div class="text-danger small">{{ form.file.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            {% if track %}Сохранить{% else %}Добавить{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список аудио -->
+    <div class="row">
+        {% for track in tracks %}
+        <div class="col-md-6 mb-3">
+            <div class="card p-3 shadow-sm h-100">
+                <h5>{{ track.title }}</h5>
+                <p>Автор: {{ track.author }}</p>
+                <p>Дата добавления: {{ track.created_at|date:"d.m.Y H:i" }}</p>
+
+                <!-- Современный аудио плеер -->
+                <div class="audio-player" style="position: relative;">
+                    <audio controls controlsList="nodownload" style="width: 100%;">
+                        <source src="{{ track.file.url }}" type="audio/mpeg">
+                        Ваш браузер не поддерживает аудио.
+                    </audio>
+                </div>
+
+                <div class="mt-2 d-flex justify-content-between">
+                    <a href="{% url 'audio-action-pk' 'edit' track.id %}" class="btn btn-sm btn-warning">Редактировать</a>
+                    <a href="{% url 'audio-action-pk' 'delete' track.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>Треков пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<!-- Запрет на правый клик для аудио -->
+<script>
+    document.querySelectorAll('audio').forEach(audio => {
+        audio.addEventListener('contextmenu', e => e.preventDefault());
+    });
+</script>
+{% endblock content %}
