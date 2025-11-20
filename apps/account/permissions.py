@@ -15,5 +15,6 @@ VIEW_PERMISSIONS = {
     "UserCreateView": ["administrator", "chef", "admin"],
     "UserUpdateView": ["administrator", "chef", "admin"],
     "UserDeleteView": ["administrator", "chef", "admin"],
+    "WeeklyReportListView": ["administrator", "chef", "admin"],
 
 }

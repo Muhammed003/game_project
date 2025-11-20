@@ -3,101 +3,179 @@
 
 {% block header %}
 <a href="{% url 'main' %}"><i class="fa-solid fa-arrow-left"></i></a>
-<div class="mx-auto text-dark">
-    Аудио
-</div>
+<div class="mx-auto text-dark">Аудио</div>
 {% endblock header %}
 
 {% block content %}
+<style>
+    .progress-box {
+        display: none;
+        margin-top: 10px;
+    }
+    .progress {
+        height: 22px;
+        background: #2d2d2d;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+    }
+    .progress-bar {
+        background: linear-gradient(90deg, #e7b500, #ffdd55);
+        font-weight: bold;
+        color: #000;
+        font-size: 13px;
+    }
+    .btn-gold {
+        background: linear-gradient(90deg, #e7b500, #ffdd55);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .btn-gold:hover {
+        opacity: .9;
+    }
+    .audio-card {
+        border-radius: 12px;
+        border: 1px solid #eee;
+        background: #fff;
+        transition: 0.2s;
+    }
+    .audio-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+</style>
+
 <div class="container my-3">
 
-    <!-- Кнопка открыть модальное окно -->
+    <!-- кнопка -->
     <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#audioModal">
-            Добавить трек
+        <button class="btn btn-gold px-4" data-bs-toggle="modal" data-bs-target="#audioModal">
+            + Добавить трек
         </button>
     </div>
 
-    <!-- Модальное окно формы -->
-    <div class="modal fade" id="audioModal" tabindex="-1" aria-hidden="true">
+    <!-- Модалка -->
+    <div class="modal fade" id="audioModal" tabindex="-1">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content rounded-4 shadow">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{ track.id|default:"Добавить новый трек" }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">Добавление трека</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+
                 <div class="modal-body">
-                    <form method="POST" enctype="multipart/form-data">
+                    <form id="audioUploadForm" enctype="multipart/form-data">
                         {% csrf_token %}
+
                         <div class="mb-3">
                             {{ form.author.label_tag }}
                             {{ form.author }}
-                            {% if form.author.errors %}
-                                <div class="text-danger small">{{ form.author.errors|striptags }}</div>
-                            {% endif %}
                         </div>
+
                         <div class="mb-3">
                             {{ form.title.label_tag }}
                             {{ form.title }}
-                            {% if form.title.errors %}
-                                <div class="text-danger small">{{ form.title.errors|striptags }}</div>
-                            {% endif %}
                         </div>
-                        <div>
-                              {{ form.number_of_name.label_tag }}
+
+                        <div class="mb-3">
+                            {{ form.number_of_name.label_tag }}
                             {{ form.number_of_name }}
                         </div>
+
                         <div class="mb-3">
                             {{ form.file.label_tag }}
-
                             {{ form.file }}
-                            {% if form.file.errors %}
-                                <div class="text-danger small">{{ form.file.errors|striptags }}</div>
-                            {% endif %}
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            {% if track %}Сохранить{% else %}Добавить{% endif %}
+
+                        <!-- Прогресс загрузки -->
+                        <div class="progress-box" id="uploadBox">
+                            <label>Загрузка аудио:</label>
+                            <div class="progress mt-1">
+                                <div class="progress-bar" id="uploadBar" role="progressbar">0%</div>
+                            </div>
+                        </div>
+
+                        <button id="submitBtn" type="submit" class="btn btn-gold w-100 mt-3">
+                            Загрузить
                         </button>
+
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Список аудио -->
+    <!-- список -->
     <div class="row">
         {% for track in tracks %}
         <div class="col-md-6 mb-3">
-            <div class="card p-3 shadow-sm h-100">
-                <h5>{{ track.title }}</h5>
-                <p>Автор: {{ track.author }}</p>
-                <p>Дата добавления: {{ track.created_at|date:"d.m.Y H:i" }}</p>
+            <div class="audio-card p-3">
+                <h5>{{ track.number_of_name }}. {{ track.title }}</h5>
+                <p class="mb-1 text-muted">Автор: {{ track.author }}</p>
+                <p class="text-muted" style="font-size:13px;">Дата: {{ track.created_at|date:"d.m.Y H:i" }}</p>
 
-                <!-- Современный аудио плеер -->
-                <div class="audio-player" style="position: relative;">
-                    <audio controls controlsList="nodownload" style="width: 100%;">
-                        <source src="{{ track.file.url }}" type="audio/mpeg">
-                        Ваш браузер не поддерживает аудио.
-                    </audio>
-                </div>
+                <audio controls controlsList="nodownload" style="width: 100%;">
+                    <source src="{{ track.file.url }}" type="audio/mpeg">
+                </audio>
 
-                <div class="mt-2 d-flex justify-content-between">
-                    <a href="{% url 'audio-action-pk' 'edit' track.id %}" class="btn btn-sm btn-warning">Редактировать</a>
-                    <a href="{% url 'audio-action-pk' 'delete' track.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                <div class="d-flex justify-content-between mt-2">
+                    <a href="{% url 'audio-action-pk' 'edit' track.id %}" class="btn btn-warning btn-sm">Редактировать</a>
+                    <a href="{% url 'audio-action-pk' 'delete' track.id %}" class="btn btn-danger btn-sm">Удалить</a>
                 </div>
             </div>
         </div>
-        {% empty %}
-        <p>Треков пока нет.</p>
         {% endfor %}
     </div>
+
 </div>
 
-<!-- Bootstrap JS -->
-<!-- Запрет на правый клик для аудио -->
 <script>
-    document.querySelectorAll('audio').forEach(audio => {
-        audio.addEventListener('contextmenu', e => e.preventDefault());
-    });
+// запрещаем скачивание
+document.querySelectorAll('audio').forEach(a => {
+    a.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+// Upload with progress
+document.getElementById("audioUploadForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    let form = this;
+    let data = new FormData(form);
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", window.location.pathname);
+
+    let box = document.getElementById("uploadBox");
+    let bar = document.getElementById("uploadBar");
+    let btn = document.getElementById("submitBtn");
+
+    box.style.display = "block";
+    btn.disabled = true;
+    btn.textContent = "Загрузка...";
+
+    xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+            let percent = Math.round((e.loaded / e.total) * 100);
+            bar.style.width = percent + "%";
+            bar.textContent = percent + "%";
+        }
+    };
+
+    xhr.onload = function () {
+        if (xhr.status === 200 || xhr.status === 302) {
+            let modal = bootstrap.Modal.getInstance(document.getElementById("audioModal"));
+            modal.hide();
+            location.reload();
+        } else {
+            alert("Ошибка загрузки.");
+            btn.disabled = false;
+        }
+    };
+
+    xhr.send(data);
+});
 </script>
+
 {% endblock content %}

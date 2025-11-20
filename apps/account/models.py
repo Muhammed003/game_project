@@ -70,7 +70,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
     )
 
     def __str__(self):
-        return self.get_full_name()
+        return self.username
 
 
 
