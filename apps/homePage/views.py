@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.views.generic import TemplateView
-
+from django.contrib import messages
 from apps.account.mixins import RoleRequiredMixin
 from apps.account.models import Country
 from django.http import JsonResponse
@@ -9,8 +11,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from apps.homePage.forms import AudioTrackForm
-from apps.homePage.models import AudioTrack
+from apps.homePage.forms import AudioTrackForm, WeeklyReportForm
+from apps.homePage.models import AudioTrack, WeeklyReport
 
 CURRENCY_FLAGS = {
             "USD": "https://flagcdn.com/w320/us.png",
@@ -219,3 +221,123 @@ class AudioAddPageView(RoleRequiredMixin, TemplateView):
             'track': track
         }
         return render(request, self.template_name, context)
+
+class WeeklyReportAddView(LoginRequiredMixin, TemplateView):
+    template_name = "projects/glavniy/weekly_report_add.html"
+
+    def get(self, request, pk=None):
+        """
+        GET → показать форму добавления или редактирования
+        """
+        report = None
+
+        # --- Редактирование ---
+        if pk:
+            report = get_object_or_404(
+                WeeklyReport,
+                pk=pk,
+                user=request.user
+            )
+            form = WeeklyReportForm(instance=report)
+
+        # --- Добавление ---
+        else:
+            form = WeeklyReportForm()
+
+        # История пользователя
+        history = WeeklyReport.objects.filter(
+            user=request.user
+        ).order_by("-create_date")
+
+        # Проверка на сегодняшнюю запись
+        today_exists = WeeklyReport.objects.filter(
+            user=request.user,
+            create_date=datetime.now().date()
+        ).exists()
+
+        return render(request, self.template_name, {
+            "form": form,
+            "report": report,
+            "history": history,
+            "today_exists": today_exists
+        })
+
+    def post(self, request, pk=None):
+        """
+        POST → сохранить данные (добавление или редактирование)
+        """
+
+        report = None
+
+        # --- Редактирование ---
+        if pk:
+            report = get_object_or_404(
+                WeeklyReport,
+                pk=pk,
+                user=request.user
+            )
+            form = WeeklyReportForm(request.POST, instance=report)
+
+        else:
+            # 😎 Защита: нельзя добавить второй раз сегодня
+            if WeeklyReport.objects.filter(
+                user=request.user,
+                create_date=datetime.now().date()
+            ).exists():
+                messages.error(request, "Вы уже добавили отчёт за сегодня.")
+                return redirect("weekly-report-add")
+
+            form = WeeklyReportForm(request.POST)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.country = request.user.country
+
+            # create_date ставим только при добавлении
+            if not pk and not obj.create_date:
+                obj.create_date = datetime.now().date()
+
+            obj.save()
+            messages.success(request, "Отчёт сохранён!")
+            return redirect("weekly-report-add")
+
+        # Если ошибка
+        history = WeeklyReport.objects.filter(user=request.user).order_by("-create_date")
+
+        return render(request, self.template_name, {
+            "form": form,
+            "history": history,
+            "report": report
+        })
+
+
+
+
+
+class WeeklyReportListView(RoleRequiredMixin, TemplateView):
+    template_name = "projects/glavniy/weekly_report_list.html"
+    allowed_roles = ["admin", "administrator", "chef"]
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        country = self.request.user.country
+        show_all = self.request.GET.get("all") == "1"
+
+        if show_all:
+            reports = WeeklyReport.objects.filter(
+                user__country=country
+            ).select_related("user").order_by("-create_date")
+        else:
+            # последние 7 дней
+            start_date = timezone.now().date() - timedelta(days=7)
+            reports = WeeklyReport.objects.filter(
+                user__country=country,
+                create_date__gte=start_date
+            ).select_related("user").order_by("-create_date")
+
+        ctx["reports"] = reports
+        ctx["show_all"] = show_all
+
+        return ctx

@@ -21,6 +21,11 @@ urlpatterns = [
   path('home/profile/administration_page/audio-add/', AudioAddPageView.as_view(), name='administration-page_audio-add'),
   path("audio/<str:action>/", AudioAddPageView.as_view(), name="audio-action"),
   path("audio/<str:action>/<int:pk>/", AudioAddPageView.as_view(), name="audio-action-pk"),
+  path("weekly/report/", WeeklyReportAddView.as_view(), name="weekly-report"),
+  path("weekly-report/", WeeklyReportAddView.as_view(), name="weekly-report-add"),
+  path("weekly-report/edit/<int:pk>/", WeeklyReportAddView.as_view(), name="weekly-report-edit"),
+  path("weekly-list-report/", WeeklyReportListView.as_view(), name="weekly-report-list"),
+
 
   # path('logout/', LogoutView.as_view(), name="logout"),
   # path('users/list/', ControlUsersView.as_view(), name="control-users"),
