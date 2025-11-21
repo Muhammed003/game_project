@@ -1,0 +1,40 @@
+{% extends '../main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-3">👑 Статистика тестов (админ)</h2>
+
+    <table class="table table-hover table-bordered shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>Пользователь</th>
+                <th>Страна</th>
+                <th>Уровней пройдено</th>
+                <th>Всего звёзд</th>
+                <th>Общий балл</th>
+                <th>Макс. уровень</th>
+                <th>Первый тест</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in stats %}
+            <tr>
+                <td>{{ item.user.username }}</td>
+                <td>{{ item.country }}</td>
+                <td>{{ item.levels_completed }}</td>
+                <td>{{ item.total_stars }}</td>
+                <td>{{ item.total_score }}</td>
+                <td>{{ item.max_level }}</td>
+                <td>{{ item.first_test|date:"d.m.Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

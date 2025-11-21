@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     # my apps
     'apps.account',
     'apps.homePage',
+    'apps.report',
+    'apps.game_test',
 
 
     # lib
