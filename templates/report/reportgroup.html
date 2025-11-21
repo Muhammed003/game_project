@@ -1,0 +1,98 @@
+{% extends '../main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4 text-center">Статистика по группам</h2>
+
+    <div class="row g-4">
+
+        {% for g in groups %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body">
+
+                    <h5 class="card-title fw-bold">
+                        {{ g.country.name }}
+                    </h5>
+                    <p class="text-muted">Код доступа: <b>{{ g.country.code_password }}</b></p>
+
+                    <ul class="list-group small mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Пользователей</span>
+                            <b>{{ g.users_count }}</b>
+                        </li>
+
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Аудио добавлено</span>
+                            <b>{{ g.audio_count }}</b>
+                        </li>
+
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Баллы за неделю</span>
+                            <b>{{ g.total_score }}</b>
+                        </li>
+                    </ul>
+
+                    <!-- Показать 1 недельный отчет -->
+                    <button class="btn btn-primary w-100 mb-2" data-bs-toggle="collapse"
+                            data-bs-target="#week_{{ forloop.counter }}">
+                        Показать последний отчёт
+                    </button>
+
+                    <div class="collapse" id="week_{{ forloop.counter }}">
+                        <div class="p-3 border rounded bg-light">
+
+                            {% if g.last_week_reports %}
+                                {% for item in g.last_week_reports %}
+                                    <div>
+                                        <b>Дата:</b> {{ item.create_date }} <br>
+                                        Бомдод: {{ item.fajr }} |
+                                        Хуфтон: {{ item.isha }} |
+                                        Тахажуд: {{ item.tahajud }}<br>
+                                        Дарс: {{ item.lesson }} |
+                                        Куръон: {{ item.koran }} |
+                                        Тафаккур: {{ item.tafakkur }}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">Нет отчётов</p>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                    <!-- Показать всю историю -->
+                    <button class="btn btn-outline-dark w-100 mt-3" data-bs-toggle="collapse"
+                            data-bs-target="#history_{{ forloop.counter }}">
+                        Полная история
+                    </button>
+
+                    <div class="collapse mt-2" id="history_{{ forloop.counter }}">
+                        <div class="p-2 border rounded bg-white" style="max-height: 250px; overflow-y: auto;">
+
+                            {% for item in g.all_reports %}
+                            <div class="border-bottom pb-2 mb-2 small">
+                                <b>{{ item.create_date }}</b><br>
+                                {{ item.fajr }} / {{ item.isha }} / {{ item.tahajud }} /
+                                {{ item.lesson }} / {{ item.koran }} / {{ item.tafakkur }}
+                            </div>
+                            {% empty %}
+                                <p class="text-muted">История пуста</p>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock content %}

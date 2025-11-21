@@ -32,6 +32,20 @@ body {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
+.super-block {
+    background: #00bcd4; /* жёлтый */
+    text-decoration: none;
+    color: #212529;
+    border-radius: 15px;
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
 
 /* Блок профиля */
 .profile-container {
@@ -99,6 +113,15 @@ body {
         <i class="fa-solid fa-lock"></i> Администрация
     </a>
 
+    {% if request.user.roles == "admin" %}
+    <a href="{% url 'test_admin_stats' %}" class="admin-block bg-info">
+        <i class="fa-solid fa-lock"></i> Результаты теста
+    </a>
+    <a href="{% url 'report-group' %}" class="super-block ">
+        <i class="fa-solid fa-lock"></i> Управление группами
+    </a>
+    {% endif %}
+
     <!-- Профиль пользователя -->
     <div class="profile-container">
 
@@ -107,6 +130,56 @@ body {
         {% if user.phone_number %}
             <p>{{ user.phone_number }}</p>
         {% endif %}
+
+
+
+        <div class="container mt-4">
+    <h2 class="fw-bold mb-3">📊 Моя статистика тестов</h2>
+
+    <div class="card shadow p-3 mb-4">
+        <h5>Общие данные:</h5>
+        <ul class="list-group">
+            <li class="list-group-item">⭐ Всего звёзд: <strong>{{ total_stars }}</strong></li>
+            <li class="list-group-item">🎯 Общий балл: <strong>{{ total_score }}</strong></li>
+            <li class="list-group-item">🏆 Максимальный уровень: <strong>{{ max_level }}</strong></li>
+        </ul>
+    </div>
+
+    <h4 class="fw-bold mt-4">Результаты по уровням:</h4>
+
+    <table class="table table-bordered table-striped mt-3 shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>Уровень</th>
+                <th>Баллы</th>
+                <th>Звёзды</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td>{{ r.level.number }}</td>
+                <td>{{ r.score }}/10</td>
+                <td>
+                    {% for i in "123" %}
+                        {% if forloop.counter <= r.stars %}
+                            <span class="text-warning">★</span>
+                        {% else %}
+                            <span class="text-secondary">☆</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ r.created_at|date:"d.m.Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+
+
 
         <a href="" class="btn btn-profile btn-change-password">Изменить пароль</a>
         <a href="{% url 'logout' %}" class="btn btn-profile btn-logout">Выйти</a>

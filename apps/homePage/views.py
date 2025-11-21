@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from apps.game_test.models import UserLevelResult
 from apps.homePage.forms import AudioTrackForm, WeeklyReportForm
 from apps.homePage.models import AudioTrack, WeeklyReport
 
@@ -151,6 +152,20 @@ class AudioListView(LoginRequiredMixin, TemplateView):
 # PROFILE &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = "projects/profile/profile.html"
+
+    def get(self, request):
+        results = UserLevelResult.objects.filter(user=request.user).order_by("level__number")
+
+        total_stars = sum(r.stars for r in results)
+        total_score = sum(r.score for r in results)
+        max_level = max([r.level.number for r in results], default=0)
+
+        return render(request, self.template_name, {
+            "results": results,
+            "total_stars": total_stars,
+            "total_score": total_score,
+            "max_level": max_level
+        })
 
 
 

@@ -1,0 +1,62 @@
+{% extends '../main/base.html' %}
+
+{% block content %}
+<div class="container py-3">
+
+    <h3 class="text-center mb-4">Уровни</h3>
+
+    <div class="row g-3">
+        {% for lvl in levels %}
+        <div class="col-6 col-md-3">
+            <div class="card p-3 text-center shadow-sm 
+                 {% if lvl.locked %}opacity-50{% endif %}"
+                 style="border-radius: 14px;">
+
+                <h5>Уровень {{ lvl.level.number }}</h5>
+
+                {% if lvl.completed %}
+                    <div class="mt-2">
+                        {% for i in "123" %}
+                            {% if forloop.counter <= lvl.stars %}
+                                ⭐
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small">Не пройден</p>
+                {% endif %}
+
+                {% if not lvl.locked %}
+                <a href="{% url 'level-test' lvl.level.number %}"
+                   class="btn btn-primary mt-2 w-100">
+                    Начать
+                </a>
+                {% else %}
+                <button class="btn btn-secondary mt-2 w-100" disabled>Закрыт</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#rulesModal">
+            Инструкция
+        </button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="rulesModal">
+  <div class="modal-dialog">
+    <div class="modal-content p-3">
+      <h4>Инструкция</h4>
+      <p>На каждом уровне 10 вопросов. 
+      Первый результат сохраняется навсегда.</p>
+      <p>Уровень открывается только после прохождения предыдущего.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
