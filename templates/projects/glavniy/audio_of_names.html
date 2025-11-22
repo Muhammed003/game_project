@@ -116,17 +116,22 @@ body {
         </div>
     </div>
 </div>
-
 <script>
+// Треки
 const tracks = [
  {% for track in tracks %}
-    {number: {{ track.number_of_name }}, title: '{{ track.title }}', artist: '{{ track.author }}', url: '{{ track.file.url }}'},
+    {
+        number: {{ track.number_of_name }},
+        title: "{{ track.title|escapejs }}",
+        artist: "{{ track.author|escapejs }}",
+        url: "{{ track.file.url }}"
+    },
  {% endfor %}
 ];
 
-// Сортируем по number_of_name
-tracks.sort((a,b) => a.number - b.number);
+tracks.sort((a,b)=> a.number - b.number);
 
+// Элементы
 const tracksContainer = document.getElementById('tracksContainer');
 const nowPlaying = document.getElementById('nowPlaying');
 const playPauseBtn = document.getElementById('playPauseBtn');
@@ -137,93 +142,112 @@ const durationSpan = document.getElementById('duration');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 
-let currentTrack = 0;
-let audio = new Audio();
-audio.preload = "auto";
+// Один аудио-объект (ускорение х10)
+const audio = new Audio();
+audio.preload = "metadata";
+let currentTrack = -1;
 let isPlaying = false;
 
-// Рендер списка треков
+// Быстрая отрисовка списка
 function renderTrackList() {
-    tracksContainer.innerHTML = '';
-    tracks.forEach((track, index) => {
-        const div = document.createElement('div');
-        div.className = 'track-item';
-        div.innerHTML = `<span>${track.number}. ${track.title}</span><span>${track.artist}</span>`;
-        div.addEventListener('click', () => loadTrack(index));
-        tracksContainer.appendChild(div);
+    let html = "";
+    tracks.forEach((t, idx) => {
+        html += `
+            <div class="track-item" data-i="${idx}">
+                <span>${t.number}. ${t.title}</span>
+                <span>${t.artist}</span>
+            </div>
+        `;
+    });
+    tracksContainer.innerHTML = html;
+
+    document.querySelectorAll('.track-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const i = Number(item.dataset.i);
+            loadTrack(i, true);
+        });
     });
 }
 renderTrackList();
 
+// Установка активного трека
 function setActiveTrack() {
-    document.querySelectorAll('.track-item').forEach((item, idx) => {
-        item.classList.toggle('active', idx === currentTrack);
+    document.querySelectorAll('.track-item').forEach((it, i) => {
+        it.classList.toggle('active', i === currentTrack);
     });
 }
 
-function loadTrack(index) {
+// Загрузка трека (без тормозов)
+function loadTrack(index, autoplay=false) {
+    if (currentTrack === index) {
+        if (autoplay) audio.play();
+        return;
+    }
+
     currentTrack = index;
-    audio.src = tracks[currentTrack].url;
-    audio.load();
-    nowPlaying.textContent = `${tracks[currentTrack].title} ${tracks[currentTrack].artist ? '- ' + tracks[currentTrack].artist : ''}`;
     setActiveTrack();
-    if (isPlaying) audio.play();
+
+    audio.src = tracks[index].url;
+    nowPlaying.textContent = `${tracks[index].title} — ${tracks[index].artist}`;
+    audio.load();
+
+    if (autoplay) {
+        audio.play().catch(()=>{});
+        playPauseBtn.innerHTML = `<i class="fas fa-pause"></i>`;
+        isPlaying = true;
+    }
 }
 
-// Кнопки плеера
+// Play / Pause
 playPauseBtn.addEventListener('click', () => {
-    if (!audio.src) return;
-    if (isPlaying) {
-        audio.pause();
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    if (currentTrack === -1) return;
+
+    if (audio.paused) {
+        audio.play().catch(()=>{});
+        playPauseBtn.innerHTML = `<i class="fas fa-pause"></i>`;
+        isPlaying = true;
     } else {
-        audio.play();
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        audio.pause();
+        playPauseBtn.innerHTML = `<i class="fas fa-play"></i>`;
+        isPlaying = false;
     }
-    isPlaying = !isPlaying;
 });
 
+// След / Пред
 prevBtn.addEventListener('click', () => {
-    currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
-    loadTrack(currentTrack);
+    loadTrack((currentTrack - 1 + tracks.length) % tracks.length, true);
 });
-
 nextBtn.addEventListener('click', () => {
-    currentTrack = (currentTrack + 1) % tracks.length;
-    loadTrack(currentTrack);
+    loadTrack((currentTrack + 1) % tracks.length, true);
 });
 
-// Прогресс и время
-audio.addEventListener('timeupdate', updateProgress);
-function updateProgress() {
-    const progress = (audio.currentTime / audio.duration) * 100;
-    progressBar.style.width = `${progress}%`;
+// Обновление прогресса (оптимизация)
+audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const percent = audio.currentTime / audio.duration * 100;
+    progressBar.style.width = percent + "%";
+
     currentTimeSpan.textContent = formatTime(audio.currentTime);
     durationSpan.textContent = formatTime(audio.duration);
-}
+});
 
-// Клик на прогресс-бар
-progressContainer.addEventListener('click', (e) => {
+// Перемотка
+progressContainer.addEventListener('click', e => {
     const rect = progressContainer.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const percent = clickX / width;
+    const percent = (e.clientX - rect.left) / rect.width;
     audio.currentTime = percent * audio.duration;
 });
 
 // Формат времени
-function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2,'0')}`;
+function formatTime(sec) {
+    if (!sec || isNaN(sec)) return "0:00";
+    return Math.floor(sec/60) + ":" + String(Math.floor(sec%60)).padStart(2, "0");
 }
 
-// Автопереход на следующий трек
+// Автопереход
 audio.addEventListener('ended', () => {
-    currentTrack = (currentTrack + 1) % tracks.length;
-    loadTrack(currentTrack);
-    audio.play();
+    loadTrack((currentTrack + 1) % tracks.length, true);
 });
 </script>
+
 {% endblock content %}
