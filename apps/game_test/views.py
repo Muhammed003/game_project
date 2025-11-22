@@ -2,7 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 from django.http import HttpResponseForbidden
-from apps.game_test.models import Level, UserLevelResult, AnswerOption
+from apps.game_test.models import Level, UserLevelResult, AnswerOption, Question
+from django.views import View
+from django.forms import modelform_factory, inlineformset_factory
+
+from apps.homePage.forms import QuestionForm, AnswerFormSet, LevelForm
 
 
 class LevelListView(LoginRequiredMixin, TemplateView):
@@ -113,3 +117,85 @@ class AdminTestStatsView(LoginRequiredMixin, TemplateView):
         stats.sort(key=lambda x: (-x["total_stars"], -x["max_level"]))
 
         return render(request, self.template_name, {"stats": stats})
+
+
+
+class QuestionAnswerCRUDView(View):
+    template_name = 'test/question_answer_crud.html'
+
+    def get(self, request, question_id=None):
+        if question_id:
+            question = get_object_or_404(Question, id=question_id)
+        else:
+            question = Question()
+        q_form = QuestionForm(instance=question)
+        a_formset = AnswerFormSet(instance=question)
+        questions = Question.objects.all().prefetch_related('options')
+        return render(request, self.template_name, {
+            'q_form': q_form,
+            'a_formset': a_formset,
+            'questions': questions,
+            'editing_question': question_id
+        })
+
+    def post(self, request, question_id=None):
+        if question_id:
+            question = get_object_or_404(Question, id=question_id)
+        else:
+            question = Question()
+        q_form = QuestionForm(request.POST, instance=question)
+        a_formset = AnswerFormSet(request.POST, instance=question)
+        if q_form.is_valid() and a_formset.is_valid():
+            q_form.save()
+            a_formset.save()
+            return redirect('question-answer-crud')
+        questions = Question.objects.all().prefetch_related('options')
+        return render(request, self.template_name, {
+            'q_form': q_form,
+            'a_formset': a_formset,
+            'questions': questions,
+            'editing_question': question_id
+        })
+
+def delete_answer(request, answer_id):
+    answer = get_object_or_404(AnswerOption, id=answer_id)
+    answer.delete()
+    return redirect('question-answer-crud')
+
+
+class LevelCRUDView(View):
+    template_name = 'test/level_crud.html'
+
+    def get(self, request, level_id=None):
+        if level_id:
+            level = get_object_or_404(Level, id=level_id)
+        else:
+            level = Level()
+        form = LevelForm(instance=level)
+        levels = Level.objects.all().order_by('number')
+        return render(request, self.template_name, {
+            'form': form,
+            'levels': levels,
+            'editing_level': level_id
+        })
+
+    def post(self, request, level_id=None):
+        if level_id:
+            level = get_object_or_404(Level, id=level_id)
+        else:
+            level = Level()
+        form = LevelForm(request.POST, instance=level)
+        if form.is_valid():
+            form.save()
+            return redirect('level-crud')
+        levels = Level.objects.all().order_by('number')
+        return render(request, self.template_name, {
+            'form': form,
+            'levels': levels,
+            'editing_level': level_id
+        })
+
+def delete_level(request, level_id):
+    level = get_object_or_404(Level, id=level_id)
+    level.delete()
+    return redirect('level-crud')

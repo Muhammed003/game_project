@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.game_test.models import Question, AnswerOption, Level
 from apps.homePage.models import AudioTrack, WeeklyReport
 
 
@@ -45,3 +46,36 @@ class WeeklyReportForm(forms.ModelForm):
         # ❗ Делаем поля обязательными
         for field in self.fields.values():
             field.required = True
+
+
+
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['level', 'text']
+        widgets = {
+            'level': forms.Select(attrs={'class':'form-select'}),
+            'text': forms.Textarea(attrs={'class':'form-control', 'rows':3}),
+        }
+
+from django.forms import inlineformset_factory
+AnswerFormSet = inlineformset_factory(
+    Question, AnswerOption,
+    fields=['text', 'is_correct'],
+    extra=4,
+    can_delete=True,
+    widgets={
+        'text': forms.TextInput(attrs={'class':'form-control'}),
+        'is_correct': forms.CheckboxInput(attrs={'class':'form-check-input'}),
+    }
+)
+
+
+class LevelForm(forms.ModelForm):
+    class Meta:
+        model = Level
+        fields = ['number', 'name']
+        widgets = {
+            'number': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }

@@ -1,0 +1,81 @@
+{% extends '../main/base.html' %}
+{% block content %}
+
+<a href="{% url 'level-crud' %}" class="btn btn-block  btn-info w-100 mb-3">{% if editing_question %}Редактировать вопрос{% else %}Добавить уровни{% endif %}</a>
+<div class="container mt-4">
+    <h2 class="mb-3">{% if editing_question %}Редактировать вопрос{% else %}Добавить вопрос{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Уровень</label>
+            {{ q_form.level }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Текст вопроса</label>
+            {{ q_form.text }}
+        </div>
+
+        <h5 class="mt-4">Варианты ответов</h5>
+        {{ a_formset.management_form }}
+        <div class="row">
+            {% for form in a_formset %}
+            <div class="col-12 col-md-6 mb-3 border p-2 rounded">
+                {{ form.id }}
+                <div class="mb-2">
+                    {{ form.text.label_tag }}
+                    {{ form.text }}
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.is_correct }}
+                    <label class="form-check-label">Правильный</label>
+                </div>
+                <div class="form-check mb-2">
+                    {{ form.DELETE }}
+                    <label class="form-check-label">Удалить</label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex flex-column flex-md-row gap-2 mt-2">
+            <button type="submit" class="btn btn-success">Сохранить</button>
+            <a href="{% url 'question-answer-crud' %}" class="btn btn-secondary">Очистить</a>
+        </div>
+    </form>
+
+    <hr class="my-4">
+    <h3>Все вопросы</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Вопрос</th>
+                    <th>Уровень</th>
+                    <th>Варианты</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions %}
+                <tr>
+                    <td>{{ question.text }}</td>
+                    <td>{{ question.level }}</td>
+                    <td>
+                        <ul class="mb-0 ps-3">
+                            {% for ans in question.options.all %}
+                            <li>{{ ans.text }} {% if ans.is_correct %}(✓){% endif %}
+                                <a href="{% url 'delete-answer' ans.id %}" class="text-danger ms-2">Удалить</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <a href="{% url 'edit-question' question.id %}" class="btn btn-primary btn-sm">Ред.</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
