@@ -356,3 +356,4 @@ class WeeklyReportListView(RoleRequiredMixin, TemplateView):
         ctx["show_all"] = show_all
 
         return ctx
+

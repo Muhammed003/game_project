@@ -1,6 +1,11 @@
 {% extends '../main/base.html' %}
 
 {% block content %}
+ <div class="text-end mt-4">
+        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#rulesModal">
+            Инструкция
+        </button>
+    </div>
 <div class="container py-3">
 
     <h3 class="text-center mb-4">Уровни</h3>
@@ -41,11 +46,7 @@
         {% endfor %}
     </div>
 
-    <div class="text-center mt-4">
-        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#rulesModal">
-            Инструкция
-        </button>
-    </div>
+
 </div>
 
 <!-- Modal -->
