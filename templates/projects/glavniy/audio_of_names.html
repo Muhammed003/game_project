@@ -90,6 +90,16 @@ body {
     margin-bottom: 15px;
     text-align: center;
 }
+
+/* Fake loading progress */
+.fake-progress {
+    animation: loading 2s infinite;
+}
+@keyframes loading {
+    0% { width: 0%; opacity: .3; }
+    50% { width: 70%; opacity: .8; }
+    100% { width: 100%; opacity: .3; }
+}
 </style>
 
 <div class="container my-5 player-container">
@@ -116,22 +126,16 @@ body {
         </div>
     </div>
 </div>
+
 <script>
-// Треки
 const tracks = [
  {% for track in tracks %}
-    {
-        number: {{ track.number_of_name }},
-        title: "{{ track.title|escapejs }}",
-        artist: "{{ track.author|escapejs }}",
-        url: "{{ track.file.url }}"
-    },
+    {number: {{ track.number_of_name }}, title: '{{ track.title|escapejs }}', artist: '{{ track.author|escapejs }}', url: '{{ track.file.url }}'},
  {% endfor %}
 ];
 
 tracks.sort((a,b)=> a.number - b.number);
 
-// Элементы
 const tracksContainer = document.getElementById('tracksContainer');
 const nowPlaying = document.getElementById('nowPlaying');
 const playPauseBtn = document.getElementById('playPauseBtn');
@@ -142,112 +146,102 @@ const durationSpan = document.getElementById('duration');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 
-// Один аудио-объект (ускорение х10)
 const audio = new Audio();
 audio.preload = "metadata";
 let currentTrack = -1;
 let isPlaying = false;
+let fakeProgressActive = false;
 
-// Быстрая отрисовка списка
+// Render track list
 function renderTrackList() {
-    let html = "";
+    tracksContainer.innerHTML = '';
     tracks.forEach((t, idx) => {
-        html += `
-            <div class="track-item" data-i="${idx}">
-                <span>${t.number}. ${t.title}</span>
-                <span>${t.artist}</span>
-            </div>
-        `;
-    });
-    tracksContainer.innerHTML = html;
-
-    document.querySelectorAll('.track-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const i = Number(item.dataset.i);
-            loadTrack(i, true);
-        });
+        const div = document.createElement('div');
+        div.className = 'track-item';
+        div.dataset.i = idx;
+        div.innerHTML = `<span>${t.number}. ${t.title}</span>`;
+        div.addEventListener('click', () => loadTrack(idx, true));
+        tracksContainer.appendChild(div);
     });
 }
 renderTrackList();
 
-// Установка активного трека
+// Active track
 function setActiveTrack() {
     document.querySelectorAll('.track-item').forEach((it, i) => {
         it.classList.toggle('active', i === currentTrack);
     });
 }
 
-// Загрузка трека (без тормозов)
-function loadTrack(index, autoplay=false) {
-    if (currentTrack === index) {
-        if (autoplay) audio.play();
-        return;
-    }
+// Fake progress
+function startFakeProgress() {
+    if(fakeProgressActive) return;
+    fakeProgressActive = true;
+    progressBar.classList.add('fake-progress');
+}
+function stopFakeProgress() {
+    fakeProgressActive = false;
+    progressBar.classList.remove('fake-progress');
+    progressBar.style.width = "0%";
+}
 
+// Load track
+function loadTrack(index, autoplay=false) {
+    if(currentTrack === index) { if(autoplay) audio.play().catch(()=>{}); return; }
     currentTrack = index;
     setActiveTrack();
-
     audio.src = tracks[index].url;
     nowPlaying.textContent = `${tracks[index].title} — ${tracks[index].artist}`;
     audio.load();
-
-    if (autoplay) {
+    if(autoplay) {
+        startFakeProgress();
         audio.play().catch(()=>{});
         playPauseBtn.innerHTML = `<i class="fas fa-pause"></i>`;
         isPlaying = true;
     }
 }
 
-// Play / Pause
+// Play/Pause
 playPauseBtn.addEventListener('click', () => {
-    if (currentTrack === -1) return;
-
-    if (audio.paused) {
-        audio.play().catch(()=>{});
-        playPauseBtn.innerHTML = `<i class="fas fa-pause"></i>`;
-        isPlaying = true;
-    } else {
-        audio.pause();
-        playPauseBtn.innerHTML = `<i class="fas fa-play"></i>`;
-        isPlaying = false;
-    }
+    if(currentTrack===-1) return;
+    if(audio.paused) { audio.play().catch(()=>{}); playPauseBtn.innerHTML=`<i class="fas fa-pause"></i>`; isPlaying=true; startFakeProgress(); }
+    else { audio.pause(); playPauseBtn.innerHTML=`<i class="fas fa-play"></i>`; isPlaying=false; }
 });
 
-// След / Пред
-prevBtn.addEventListener('click', () => {
-    loadTrack((currentTrack - 1 + tracks.length) % tracks.length, true);
-});
-nextBtn.addEventListener('click', () => {
-    loadTrack((currentTrack + 1) % tracks.length, true);
-});
+// Prev/Next
+prevBtn.addEventListener('click', ()=> loadTrack((currentTrack-1+tracks.length)%tracks.length,true));
+nextBtn.addEventListener('click', ()=> loadTrack((currentTrack+1)%tracks.length,true));
 
-// Обновление прогресса (оптимизация)
+// Update progress
 audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
+    if(!audio.duration) return;
     const percent = audio.currentTime / audio.duration * 100;
     progressBar.style.width = percent + "%";
-
     currentTimeSpan.textContent = formatTime(audio.currentTime);
     durationSpan.textContent = formatTime(audio.duration);
 });
 
-// Перемотка
+// Click on progress bar
 progressContainer.addEventListener('click', e => {
+    if(!audio.duration || isNaN(audio.duration)) return;
     const rect = progressContainer.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = percent * audio.duration;
+    const percent = (e.clientX - rect.left)/rect.width;
+    const newTime = percent * audio.duration;
+    if(isFinite(newTime)) audio.currentTime = newTime;
 });
 
-// Формат времени
+// Format time
 function formatTime(sec) {
-    if (!sec || isNaN(sec)) return "0:00";
-    return Math.floor(sec/60) + ":" + String(Math.floor(sec%60)).padStart(2, "0");
+    if(!sec||isNaN(sec)) return "0:00";
+    return Math.floor(sec/60) + ":" + String(Math.floor(sec%60)).padStart(2,"0");
 }
 
-// Автопереход
-audio.addEventListener('ended', () => {
-    loadTrack((currentTrack + 1) % tracks.length, true);
-});
-</script>
+// Auto next
+audio.addEventListener('ended', ()=> loadTrack((currentTrack+1)%tracks.length,true));
 
+// Fake progress handling
+audio.addEventListener("playing", ()=> stopFakeProgress());
+audio.addEventListener("waiting", ()=> startFakeProgress());
+
+</script>
 {% endblock content %}
