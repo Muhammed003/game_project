@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'apps.homePage',
     'apps.report',
     'apps.game_test',
+    'apps.tunduk',
 
 
     # lib
