@@ -1,148 +1,141 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Passport</title>
-<link rel="stylesheet" href="style.css">
-</head>
+
 <style>
-  body {
-    margin: 0;
-    background: #0D61D9;
-    font-family: Arial, sans-serif;
+body {
+    margin: 5px;
+    background: #005dc7;
+    font-family: "Arial", sans-serif;
 }
 
+/* Верх */
 .top-bar {
     display: flex;
     align-items: center;
-    padding: 20px;
+    padding: 18px 20px;
     color: white;
     font-size: 22px;
+    font-weight: 600;
 }
 
 .back-arrow {
-    font-size: 30px;
-    margin-right: 15px;
+    font-size: 34px;
+    margin-right: 140px;
 }
 
+/* Контейнер карты */
 .card-container {
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+    width: 92%;
+    margin: 0 auto;
+    margin-top: 12px;
+    background: url("{% static 'img/passport_image.jpg' %}") center/cover no-repeat;
+    border-radius: 22px;
+    padding: 18px;
+    height: 520px;
+    position: relative;
 }
 
-.id-card {
-    background: white;
-    border-radius: 25px;
-    width: 90%;
-    padding: 25px;
+/* Фото */
+.photo-box {
+    width: 128px;
+    height: 160px;
+    background: #dcdcdc;
+    border-radius: 10px;
+    overflow: hidden;
+    position: absolute;
+    left: 25px;
+    top: 135px;
 }
 
-.header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.flag {
-    width: 60px;
-}
-
-.chip {
-    width: 60px;
-}
-
-.photo-row {
-    display: flex;
-    margin-top: 20px;
-}
-
-.photo {
-    width: 120px;
-    height: 150px;
-    background: #ddd;
-    border-radius: 8px;
-}
-
-.info {
-    margin-left: 20px;
-    font-size: 15px;
-}
-
-.signature-block {
-    margin-top: 30px;
-    text-align: center;
-    font-size: 14px;
-}
-
-.signature-img {
-    width: 120px;
-    margin-top: 10px;
-}
-
-.bottom-area {
+.photo-box img {
     width: 100%;
-    margin-top: 80px;
-    background: white;
-    border-top-left-radius: 40px;
-    border-top-right-radius: 40px;
-    padding: 40px 0;
-    display: flex;
-    justify-content: center;
+    height: 100%;
+    object-fit: cover;
 }
 
-.qr {
-    width: 110px;
-    height: 110px;
-    background: #0D61D9;
-    border-radius: 50%;
+/* Текстовые блоки справа */
+.text-block {
+    position: absolute;
+    left: 170px;
+    top: 130px;
+    width: 63%;
+}
+
+.label {
+    font-size: 11px;
+    color: #444;
+    margin-top: 5px;
+    margin-bottom: 1px;
+}
+
+.value {
+    font-size: 15px;
+    font-weight: 550;
+    color: #000;
+    margin-bottom: 3px;
+}
+
+/* Подпись */
+.signature-box {
+    position: absolute;
+    left: 25px;
+    bottom: 30px;
+}
+
+.signature-box img {
+    width: 160px;
 }
 </style>
+</head>
+
 <body>
 
 <div class="top-bar">
-    <div class="back-arrow">‹</div>
-    <div class="title">Паспорт</div>
+    <a href="{% url 'tun-documents' %}" style="text-decoration: none;  color: #fff;" class="back-arrow">‹</a>
+    Паспорт
 </div>
 
 <div class="card-container">
-    <div class="id-card">
 
-        <div class="header-row">
-            <img src="flag.png" class="flag">
-            <div class="header-text">
-                КЫРГЫЗ РЕСПУБЛИКАСЫ<br>
-                КЫРГЫЗСКАЯ РЕСПУБЛИКА<br>
-                THE KYRGYZ REPUBLIC
-            </div>
-            <img src="chip.png" class="chip">
-        </div>
-
-        <div class="photo-row">
-            <div class="photo"></div>
-
-            <div class="info">
-                <div><strong>Аты / Имя / Name</strong><br>ИМЯ</div>
-                <div><strong>Фамилия / Surname</strong><br>ФАМИЛИЯ</div>
-                <div><strong>Атасыны аты / Отчество / Patronymic</strong><br>ОТЧЕСТВО</div>
-
-                <div><strong>Жынысы / Sex</strong><br>М</div>
-                <div><strong>Жарандыгы / Citizenship</strong><br>Кыргыз Республикасы</div>
-                <div><strong>Улуту / Nationality</strong><br>Улут</div>
-                <div><strong>Туулган күнү / Date of birth</strong><br>01.01.2000</div>
-            </div>
-        </div>
-
-        <div class="signature-block">
-            <div>Колу / Подпись / Signature</div>
-            <img src="signature.png" class="signature-img">
-        </div>
+    <!-- Фото -->
+    <div class="photo-box">
+        <img src="{% static 'img/user_umar.jpg' %}" alt="">
     </div>
-</div>
 
-<div class="bottom-area">
-    <div class="qr"></div>
+    <!-- Тексты -->
+    <div class="text-block">
+        <div class="label">Аты / Имя / Name</div>
+        <div class="value">УМАР / UMAR</div>
+
+        <div class="label">Фамилиясы / Фамилия / Surname</div>
+        <div class="value">АЗИМОВ / AZIMOV</div>
+
+        <div class="label">Атасынын аты / Отчество / Patronymic</div>
+        <div class="value">МУХАМАДЖАНОВИЧ</div>
+
+        <div class="label">Жынысы / Пол / Sex</div>
+        <div class="value">Э / M</div>
+
+        <div class="label">Жарандыгы / Гражданство / Citizenship</div>
+        <div class="value">Кыргыз Республикасы</div>
+
+        <div class="label">Улуту / Национальность / Nationality</div>
+        <div class="value">Өзбек</div>
+
+        <div class="label">Туулган күнү / Дата рождения <br> / Date of birth</div>
+        <div class="value">13.01.2003</div>
+    </div>
+
+    <!-- Подпись -->
+<!--    <div class="signature-box">-->
+<!--        <img src="{% static 'img/signature.png' %}">-->
+<!--    </div>-->
+
 </div>
 
 </body>
