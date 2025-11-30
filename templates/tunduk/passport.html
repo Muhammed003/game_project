@@ -1,5 +1,5 @@
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 
 <style>
 body {
-    margin: 5px;
+    padding: 5px;
     background: #005dc7;
     font-family: "Arial", sans-serif;
 }
@@ -38,8 +38,19 @@ body {
     padding: 18px;
     height: 520px;
     position: relative;
+    letter-spacing: 0.3px;
 }
-
+.card-back-container{
+ width: 92%;
+    margin: 0 auto;
+    margin-top: 12px;
+    background: url("{% static 'img/passport_back.jpg' %}") center/cover no-repeat;
+    border-radius: 22px;
+    padding: 18px;
+    height: 520px;
+    position: relative;
+    letter-spacing: 0.3px;
+}
 /* Фото */
 .photo-box {
     width: 128px;
@@ -63,33 +74,129 @@ body {
     position: absolute;
     left: 170px;
     top: 130px;
-    width: 63%;
+    width: 50%;
 }
 
 .label {
     font-size: 11px;
-    color: #444;
+    color: #555;
     margin-top: 5px;
     margin-bottom: 1px;
 }
 
 .value {
     font-size: 15px;
-    font-weight: 550;
     color: #000;
     margin-bottom: 3px;
+    font-family: "Source Sans Pro", sans-serif !important;
 }
 
 /* Подпись */
 .signature-box {
     position: absolute;
-    left: 25px;
-    bottom: 30px;
+    left: -2px;
+    bottom: 133px;
 }
 
 .signature-box img {
     width: 160px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.passport-back {
+    padding: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-size: cover !important;
+}
+
+.back-text-block {
+    width: 100%;
+    margin-top: 70px;
+}
+
+.back-text-block .label {
+    font-size: 12px;
+    color: #555;
+    margin-top: 10px;
+}
+
+.back-text-block .value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+    margin-top: 3px;
+    margin-bottom: 5px;
+    font-family: "Source Sans Pro", sans-serif;
+    line-height: 1.25;
+}
+
+
+
+
+
+
+
+
+
+/* Точки переключения */
+.dots {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: #7aaef5;
+    border-radius: 50%;
+    margin: 0 6px;
+    transition: 0.3s;
+    z-index: 11;
+}
+
+.dot.active {
+    background: white;
+    width: 22px;
+    border-radius: 14px;
+    z-index: 11;
+}
+.card-wrapper {
+    position: relative;
+    width: 100%;
+    height: 520px; /* высота карты */
+    margin-top: 10px;
+}
+
+#card-front,
+#card-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateX(0%);
+    width: 92%;
+    height: 520px;
+    backface-visibility: hidden;
+}
+
 </style>
 </head>
 
@@ -99,44 +206,218 @@ body {
     <a href="{% url 'tun-documents' %}" style="text-decoration: none;  color: #fff;" class="back-arrow">‹</a>
     Паспорт
 </div>
+<div class="card-wrapper">
 
-<div class="card-container">
 
-    <!-- Фото -->
-    <div class="photo-box">
-        <img src="{% static 'img/user_umar.jpg' %}" alt="">
+    <div class="card-container" id="card-front">
+
+        <!-- Фото -->
+        <div class="photo-box">
+            <img src="{% static 'img/user_umar.jpg' %}" alt="">
+        </div>
+
+        <!-- Тексты -->
+        <div class="text-block">
+            <div class="label">Аты / Имя / Name</div>
+            <div class="value">УМАР / UMAR</div>
+
+            <div class="label">Фамилиясы / Фамилия / Surname</div>
+            <div class="value">АЗИМОВ / AZIMOV</div>
+
+            <div class="label">Атасынын аты / Отчество / Patronymic</div>
+            <div class="value">МУХАМАДЖАНОВИЧ</div>
+
+            <div class="label">Жынысы / Пол / Sex</div>
+            <div class="value">Э / M</div>
+
+            <div class="label">Жарандыгы / Гражданство / Citizenship</div>
+            <div class="value">Кыргыз Республикасы</div>
+
+            <div class="label">Улуту / Национальность / Nationality</div>
+            <div class="value">Өзбек</div>
+
+            <div class="label">Туулган күнү / Дата рождения <br> / Date of birth</div>
+            <div class="value">12.04.1993</div>
+        </div>
+
+        <div class="signature-box">
+            <img src="{% static 'img/signature.png' %}">
+        </div>
+
     </div>
+    <div class="card-back-container" id="card-back">
+     <div class="passport-back">
 
-    <!-- Тексты -->
-    <div class="text-block">
-        <div class="label">Аты / Имя / Name</div>
-        <div class="value">УМАР / UMAR</div>
+            <div class="back-text-block">
 
-        <div class="label">Фамилиясы / Фамилия / Surname</div>
-        <div class="value">АЗИМОВ / AZIMOV</div>
+                <div class="label">БЕРГЕН МЕКЕМЕ / Орган выдачи / Authority</div>
+                <div class="value">МКК 212011</div>
 
-        <div class="label">Атасынын аты / Отчество / Patronymic</div>
-        <div class="value">МУХАМАДЖАНОВИЧ</div>
+                <div class="label">БЕРИЛГЕН КҮНҮ / Дата выдачи / Date of issue</div>
+                <div class="value">22.07.2020</div>
 
-        <div class="label">Жынысы / Пол / Sex</div>
-        <div class="value">Э / M</div>
+                <div class="label">ЖЕКЕ НОМУР / Персональный номер / Personal number</div>
+                <div class="value">21204199300312</div>
 
-        <div class="label">Жарандыгы / Гражданство / Citizenship</div>
-        <div class="value">Кыргыз Республикасы</div>
+                <div class="label">Документтин № / № Документа / Document №</div>
+                <div class="value">ID1412556</div>
 
-        <div class="label">Улуту / Национальность / Nationality</div>
-        <div class="value">Өзбек</div>
+                <div class="label">КОЛДОНУУ МӨӨНӨТҮ / Срок действия / Date of expiry</div>
+                <div class="value">22.07.2030</div>
 
-        <div class="label">Туулган күнү / Дата рождения <br> / Date of birth</div>
-        <div class="value">13.01.2003</div>
+                <div class="label">КАТТАЛГАН ЖЕРИ / Адрес прописки / Address</div>
+                <div class="value">Кыргызская Республика, г. Ош, улица Абдуллаева, дом 11</div>
+
+            </div>
+
+        </div>
+
+
     </div>
-
-    <!-- Подпись -->
-<!--    <div class="signature-box">-->
-<!--        <img src="{% static 'img/signature.png' %}">-->
-<!--    </div>-->
 
 </div>
+<!-- Индикаторы -->
+<div class="dots">
+    <div class="dot active" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+</div>
+<script>
+   const front = document.getElementById("card-front");
+const back = document.getElementById("card-back");
+const dot1 = document.getElementById("dot1");
+const dot2 = document.getElementById("dot2");
+
+let startX = 0;
+let isDragging = false;
+let currentSide = 1; // 1 = front, 2 = back
+
+front.style.zIndex = 2;
+back.style.zIndex = 1;
+back.style.opacity = "0";
+back.style.display = "block";
+
+// touch start
+document.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+});
+
+// touch move
+document.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+
+    let delta = e.touches[0].clientX - startX;
+    let shift = Math.max(Math.min(delta, 160), -160);
+
+    if (currentSide === 1) {
+        front.style.transform = `translateX(${shift}px)`;
+        back.style.opacity = Math.min(Math.abs(shift) / 160, 1);
+    } else {
+        back.style.transform = `translateX(${shift}px)`;
+        front.style.opacity = Math.min(Math.abs(shift) / 160, 1);
+    }
+});
+
+// touch end
+document.addEventListener("touchend", (e) => {
+    isDragging = false;
+
+    let endX = e.changedTouches[0].clientX;
+    let diff = endX - startX;
+
+    // слабый свайп – возврат
+    if (Math.abs(diff) < 80) {
+        returnToCenter();
+        return;
+    }
+
+    // если мы на передней – переключаемся на заднюю
+    if (currentSide === 1) {
+        showBack();
+        return;
+    }
+
+    // если мы на задней – переключаемся на переднюю
+    if (currentSide === 2) {
+        showFront();
+        return;
+    }
+});
+
+// Возврат без переключения
+function returnToCenter() {
+    front.style.transition = "0.3s";
+    back.style.transition = "0.3s";
+
+    front.style.transform = "translateX(0)";
+    back.style.transform = "translateX(0)";
+
+    if (currentSide === 1) {
+        back.style.opacity = "0";
+    } else {
+        front.style.opacity = "0";
+    }
+
+    setTimeout(() => {
+        front.style.transition = "";
+        back.style.transition = "";
+    }, 300);
+}
+
+// Показ задней
+function showBack() {
+    currentSide = 2;
+
+    back.style.zIndex = 2;
+    front.style.zIndex = 1;
+
+    front.style.transition = "0.3s";
+    back.style.transition = "0.3s";
+
+    front.style.opacity = "0";
+    back.style.opacity = "1";
+
+    // передняя уходит в любую сторону
+    front.style.transform = `translateX(-100%)`;
+    back.style.transform = "translateX(0)";
+
+    setTimeout(() => {
+        front.style.transform = "translateX(0)";
+        front.style.opacity = "1";
+        front.style.transition = "";
+    }, 300);
+
+    dot1.classList.remove("active");
+    dot2.classList.add("active");
+}
+
+// Показ передней
+function showFront() {
+    currentSide = 1;
+
+    front.style.zIndex = 2;
+    back.style.zIndex = 1;
+
+    front.style.transition = "0.3s";
+    back.style.transition = "0.3s";
+
+    back.style.opacity = "0";
+    front.style.opacity = "1";
+
+    // задняя уходит в любую сторону
+    back.style.transform = `translateX(100%)`;
+    front.style.transform = "translateX(0)";
+
+    setTimeout(() => {
+        back.style.transform = "translateX(0)";
+        back.style.transition = "";
+    }, 300);
+
+    dot1.classList.add("active");
+    dot2.classList.remove("active");
+}
+
+</script>
 
 </body>
 </html>
