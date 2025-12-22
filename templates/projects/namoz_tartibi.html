@@ -1,0 +1,142 @@
+{% extends '../main/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    :root {
+        --bg: #f4f6f8;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --primary: #2563eb;
+    }
+
+    body {
+        background: var(--bg);
+    }
+
+    .pdf-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 16px;
+    }
+
+    .pdf-card {
+        background: var(--card);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        padding: 24px;
+    }
+
+    .pdf-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 16px;
+    }
+
+    .pdf-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .pdf-title img {
+        width: 42px;
+        opacity: 0.85;
+    }
+
+    .pdf-title h1 {
+        font-size: 1.4rem;
+        color: var(--text);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .pdf-title span {
+        font-size: 0.9rem;
+        color: var(--muted);
+    }
+
+    .pdf-actions a {
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        color: var(--text);
+        transition: all 0.2s ease;
+    }
+
+    .pdf-actions a:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+
+    .pdf-viewer {
+        width: 100%;
+        height: 78vh;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        background: #fafafa;
+    }
+
+    .pdf-viewer iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    @media (max-width: 768px) {
+        .pdf-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .pdf-viewer {
+            height: 65vh;
+        }
+    }
+</style>
+
+<div class="pdf-layout">
+    <div class="pdf-card">
+
+        <div class="pdf-header">
+            <div class="pdf-title">
+                <div>
+                    <h1>Намаз</h1>
+                    <span>Полное руководство (PDF)</span>
+                </div>
+            </div>
+
+            <div class="pdf-actions">
+                <a href="{% static 'books/namaz.pdf' %}" download>
+                    Скачать PDF
+                </a>
+            </div>
+        </div>
+
+            <div class="pdf-viewer d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <p>Ваш браузер не поддерживает просмотр PDF.</p>
+                    <a class="btn btn-primary"
+                       href="{% static 'books/namaz.pdf' %}"
+                       target="_blank">
+                        Открыть PDF
+                    </a>
+                </div>
+            </div>
+
+    </div>
+</div>
+
+{% endblock content %}
+

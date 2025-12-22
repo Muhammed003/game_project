@@ -10,6 +10,10 @@ from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
+from django.utils.timezone import now
+from datetime import timedelta
+
 
 from apps.game_test.models import UserLevelResult
 from apps.homePage.forms import AudioTrackForm, WeeklyReportForm
@@ -236,17 +240,13 @@ class AudioAddPageView(RoleRequiredMixin, TemplateView):
             'track': track
         }
         return render(request, self.template_name, context)
+User = get_user_model()
 
 class WeeklyReportAddView(LoginRequiredMixin, TemplateView):
     template_name = "projects/glavniy/weekly_report_add.html"
 
     def get(self, request, pk=None):
-        """
-        GET → показать форму добавления или редактирования
-        """
         report = None
-
-        # --- Редактирование ---
         if pk:
             report = get_object_or_404(
                 WeeklyReport,
@@ -254,72 +254,63 @@ class WeeklyReportAddView(LoginRequiredMixin, TemplateView):
                 user=request.user
             )
             form = WeeklyReportForm(instance=report)
-
-        # --- Добавление ---
         else:
             form = WeeklyReportForm()
 
         # История пользователя
-        history = WeeklyReport.objects.filter(
-            user=request.user
-        ).order_by("-create_date")
+        history = WeeklyReport.objects.filter(user=request.user).order_by("-create_date")
 
-        # Проверка на сегодняшнюю запись
+        # Проверка на сегодняшний отчёт
         today_exists = WeeklyReport.objects.filter(
             user=request.user,
-            create_date=datetime.now().date()
+            create_date=now().date()
         ).exists()
+
+        users_status = None
+        if request.user.roles=="administrator" or request.user.roles=="chef":
+            # Список всех пользователей и статус сдачи отчёта на этой неделе
+            start_of_week = now().date() - timedelta(days=now().weekday())
+            end_of_week = start_of_week + timedelta(days=6)
+
+            users = User.objects.filter(country=self.request.user.country).order_by("username")
+            users_status = []
+            for u in users:
+                report_exists = WeeklyReport.objects.filter(
+                    user=u,
+                    create_date__range=[start_of_week, end_of_week]
+                ).exists()
+                users_status.append({"user": u, "report_exists": report_exists})
 
         return render(request, self.template_name, {
             "form": form,
             "report": report,
             "history": history,
-            "today_exists": today_exists
+            "today_exists": today_exists,
+            "users_status": users_status,
         })
 
     def post(self, request, pk=None):
-        """
-        POST → сохранить данные (добавление или редактирование)
-        """
-
         report = None
-
-        # --- Редактирование ---
         if pk:
-            report = get_object_or_404(
-                WeeklyReport,
-                pk=pk,
-                user=request.user
-            )
+            report = get_object_or_404(WeeklyReport, pk=pk, user=request.user)
             form = WeeklyReportForm(request.POST, instance=report)
-
         else:
-            # 😎 Защита: нельзя добавить второй раз сегодня
-            if WeeklyReport.objects.filter(
-                user=request.user,
-                create_date=datetime.now().date()
-            ).exists():
+            if WeeklyReport.objects.filter(user=request.user, create_date=now().date()).exists():
                 messages.error(request, "Вы уже добавили отчёт за сегодня.")
                 return redirect("weekly-report-add")
-
             form = WeeklyReportForm(request.POST)
 
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
             obj.country = request.user.country
-
-            # create_date ставим только при добавлении
             if not pk and not obj.create_date:
-                obj.create_date = datetime.now().date()
-
+                obj.create_date = now().date()
             obj.save()
             messages.success(request, "Отчёт сохранён!")
             return redirect("weekly-report-add")
 
-        # Если ошибка
         history = WeeklyReport.objects.filter(user=request.user).order_by("-create_date")
-
         return render(request, self.template_name, {
             "form": form,
             "history": history,
@@ -357,3 +348,6 @@ class WeeklyReportListView(RoleRequiredMixin, TemplateView):
 
         return ctx
 
+
+class NamozTartibi(TemplateView):
+    template_name = "projects/namoz_tartibi.html"

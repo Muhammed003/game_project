@@ -29,10 +29,16 @@ class WeeklyReport(models.Model):
     user = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='users_weekly_report')
     fajr = models.PositiveIntegerField(default=0, verbose_name='Бомдод')
     isha = models.PositiveIntegerField(default=0, verbose_name='Хуфтон')
-    tahajud = models.PositiveIntegerField(default=0, verbose_name='Тахажуд')
-    lesson = models.PositiveIntegerField(default=0, verbose_name='Дарс')
     koran = models.PositiveIntegerField(default=0, verbose_name='Куръон')
+    lesson = models.PositiveIntegerField(default=0, verbose_name='Такрор')
     tafakkur = models.PositiveIntegerField(default=0, verbose_name='Тафаккур')
+    infok = models.PositiveIntegerField(default=0, verbose_name='Инфок')
+    duo = models.PositiveIntegerField(default=0, verbose_name='Дуолар')
+    zikr = models.PositiveIntegerField(default=0, verbose_name='Зикрлар')
+    tahajud = models.PositiveIntegerField(default=0, verbose_name='Тахажжуд')
+    ishrok = models.PositiveIntegerField(default=0, verbose_name='Ишрок')
+    nafl_roza = models.PositiveIntegerField(default=0, verbose_name='Нафл роза')
+    misvak = models.PositiveIntegerField(default=0, verbose_name='Мисвак')
     create_date = models.DateField(auto_now_add=False, verbose_name="Дата добавления", null=True, blank=True)
     country = models.ForeignKey(
         to=Country,

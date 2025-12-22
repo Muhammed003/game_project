@@ -25,6 +25,7 @@ urlpatterns = [
   path("weekly-report/", WeeklyReportAddView.as_view(), name="weekly-report-add"),
   path("weekly-report/edit/<int:pk>/", WeeklyReportAddView.as_view(), name="weekly-report-edit"),
   path("weekly-list-report/", WeeklyReportListView.as_view(), name="weekly-report-list"),
+  path("namaz/", NamozTartibi.as_view(), name="namaz-tartibi"),
 
 
   # path('logout/', LogoutView.as_view(), name="logout"),

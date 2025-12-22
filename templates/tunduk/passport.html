@@ -377,19 +377,27 @@ function showBack() {
     front.style.opacity = "0";
     back.style.opacity = "1";
 
-    // передняя уходит в любую сторону
+    // передняя уходит влево
     front.style.transform = `translateX(-100%)`;
     back.style.transform = "translateX(0)";
 
+    // задержка 1 секунда перед возвратом
     setTimeout(() => {
+        front.style.transition = "0.3s"; // можно добавить плавность при возврате
         front.style.transform = "translateX(0)";
         front.style.opacity = "1";
-        front.style.transition = "";
-    }, 300);
+
+        setTimeout(() => {
+            // сброс transition через 0.3s после завершения анимации
+            front.style.transition = "";
+        }, 300);
+
+    }, 500); // <-- здесь 1 секунда задержки
 
     dot1.classList.remove("active");
     dot2.classList.add("active");
 }
+
 
 // Показ передней
 function showFront() {
