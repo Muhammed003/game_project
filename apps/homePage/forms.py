@@ -25,25 +25,32 @@ class AudioTrackForm(forms.ModelForm):
 class WeeklyReportForm(forms.ModelForm):
     class Meta:
         model = WeeklyReport
-        fields = ["fajr", "isha", "tahajud", "lesson", "koran", "tafakkur"]
+        fields = [
+            "fajr", "isha", "tahajud", "lesson", "koran", "tafakkur",
+            "infok", "duo", "zikr", "ishrok", "nafl_roza", "misvak"
+        ]
         widgets = {
-            "fajr": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
-            "isha": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
-            "tahajud": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
-            "lesson": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
-            "koran": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
-            "tafakkur": forms.NumberInput(attrs={"class": "form-control", "value": "", "placeholder":"0"}),
+            "fajr": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "isha": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "tahajud": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "lesson": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "koran": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "tafakkur": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "infok": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "duo": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "zikr": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "ishrok": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "nafl_roza": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
+            "misvak": forms.NumberInput(attrs={"class": "form-control", "placeholder": "0"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # ❗ Передаём пустой value вместо 0
-        for name, field in self.fields.items():
-            if not self.instance.pk:  # Только при создании
+        # Для новых объектов оставляем пустые поля
+        if not self.instance.pk:
+            for field in self.fields.values():
                 field.initial = None
-
-        # ❗ Делаем поля обязательными
+        # Все поля обязательны
         for field in self.fields.values():
             field.required = True
 
