@@ -149,7 +149,7 @@
             <tbody>
                 {% for u in users_status %}
                 <tr>
-                    <td>{{ u.user.get_full_name }}</td>
+                    <td>{{ u.user.username }}</td>
                     <td>
                         {% if u.report_exists %}
                             <span class="badge bg-success">Сдал</span>
