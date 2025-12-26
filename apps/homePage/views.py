@@ -330,22 +330,39 @@ class WeeklyReportListView(RoleRequiredMixin, TemplateView):
 
         country = self.request.user.country
         show_all = self.request.GET.get("all") == "1"
+        selected_date = self.request.GET.get("date")
 
+        base_qs = WeeklyReport.objects.filter(
+            user__country=country
+        ).select_related("user")
+
+        # 👉 список дат (ТОЛЬКО если история)
+        available_dates = []
         if show_all:
-            reports = WeeklyReport.objects.filter(
-                user__country=country
-            ).select_related("user").order_by("-create_date")
+            available_dates = (
+                base_qs
+                .values_list("create_date", flat=True)
+                .distinct()
+                .order_by("-create_date")
+            )
+
+        # 👉 фильтрация
+        if show_all and selected_date:
+            reports = base_qs.filter(create_date=selected_date)
+        elif show_all:
+            reports = base_qs.order_by("-create_date")
         else:
-            # последние 7 дней
-            start_date = timezone.now().date() - timedelta(days=7)
-            reports = WeeklyReport.objects.filter(
-                user__country=country,
-                create_date__gte=start_date
-            ).select_related("user").order_by("-create_date")
+            start_week = timezone.now().date() - timedelta(days=7)
+            reports = base_qs.filter(
+                create_date__gte=start_week
+            ).order_by("-create_date")
 
-        ctx["reports"] = reports
-        ctx["show_all"] = show_all
-
+        ctx.update({
+            "reports": reports,
+            "show_all": show_all,
+            "available_dates": available_dates,
+            "selected_date": selected_date,
+        })
         return ctx
 
 

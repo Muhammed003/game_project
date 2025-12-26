@@ -47,3 +47,11 @@ class WeeklyReport(models.Model):
         blank=True,
         verbose_name="Страна"
      )
+
+    @property
+    def total_points(self):
+        return (
+                self.fajr + self.isha + self.tahajud + self.ishrok +
+                self.koran + self.lesson + self.tafakkur + self.zikr +
+                self.duo + self.infok + self.nafl_roza + self.misvak
+        )
