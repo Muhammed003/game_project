@@ -1,78 +1,100 @@
 {% extends '../../main/base.html' %}
-{% load static %}
-
 {% block content %}
 
 <style>
-    .card-modern {
-        border-radius: 18px;
-        background: #fff;
-        border: none;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.05);
-    }
-    .btn-switch {
-        border-radius: 10px;
-        font-weight: 600;
-    }
+.date-btn {
+    border-radius: 10px;
+    font-size: 13px;
+    padding: 6px 12px;
+}
+.date-btn.active {
+    background: #0d6efd;
+    color: #fff;
+}
 </style>
 
 <div class="container mt-4">
+
+    <!-- HEADER -->
     <div class="d-flex justify-content-between mb-3">
-        <h3>📘 Еженедельные отчёты </h3>
+        <h3>📘 Еженедельные отчёты</h3>
 
         {% if show_all %}
-            <a href="?all=0" class="btn btn-primary btn-switch">
-                Показать только неделю
-            </a>
+            <a href="?all=0" class="btn btn-primary">Текущая неделя</a>
         {% else %}
-            <a href="?all=1" class="btn btn-secondary btn-switch">
-                Показать всю историю
-            </a>
+            <a href="?all=1" class="btn btn-secondary">История</a>
         {% endif %}
     </div>
 
-    <div class="card card-modern p-4">
+    <!-- 📅 СПИСОК ДАТ -->
+    {% if show_all %}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        {% for d in available_dates %}
+            <a href="?all=1&date={{ d|date:'Y-m-d' }}"
+   class="btn btn-outline-primary date-btn {% if d|date:'Y-m-d' == selected_date %}active{% endif %}">
+    {{ d|date:"d.m.y" }}
+</a>
+        {% empty %}
+            <span class="text-muted">Нет дат</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 📊 ТАБЛИЦА -->
+    <div class="card p-3">
         <div class="table-responsive">
-            <table class="table table-modern">
-                <thead>
+            <table class="table table-bordered table-sm">
+
+                <thead class="table-light">
                     <tr>
                         <th>Пользователь</th>
-                        <th>Фаджр</th>
-                        <th>Иша</th>
-                        <th>Тахаджуд</th>
-                        <th>Урок</th>
-                        <th>Коран</th>
+                        <th>Бомдод</th>
+                        <th>Хуфтон</th>
+                        <th>Тахажжуд</th>
+                        <th>Ишрок</th>
+                        <th>Куръон</th>
+                        <th>Такрор</th>
                         <th>Тафаккур</th>
+                        <th>Зикр</th>
+                        <th>Дуо</th>
+                        <th>Инфок</th>
+                        <th>Нафл</th>
+                        <th>Мисвак</th>
                         <th>Баллы</th>
                     </tr>
                 </thead>
+
                 <tbody>
-
-                    {% for item in reports %}
-                    {% with total=item.fajr|add:item.isha|add:item.tahajud|add:item.lesson|add:item.koran|add:item.tafakkur %}
-                    <tr>
-                        <td>{{ item.user.username }}</td>
-                        <td>{{ item.fajr }}</td>
-                        <td>{{ item.isha }}</td>
-                        <td>{{ item.tahajud }}</td>
-                        <td>{{ item.lesson }}</td>
-                        <td>{{ item.koran }}</td>
-                        <td>{{ item.tafakkur }}</td>
-                        <td><strong>{{ total }}</strong></td>
-                    </tr>
-                    {% endwith %}
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center py-3">
-                            Нет данных
-                        </td>
-                    </tr>
-                    {% endfor %}
-
+                {% for item in reports %}
+                <tr>
+                    <td>{{ item.user.username }}</td>
+                    <td>{{ item.fajr }}</td>
+                    <td>{{ item.isha }}</td>
+                    <td>{{ item.tahajud }}</td>
+                    <td>{{ item.ishrok }}</td>
+                    <td>{{ item.koran }}</td>
+                    <td>{{ item.lesson }}</td>
+                    <td>{{ item.tafakkur }}</td>
+                    <td>{{ item.zikr }}</td>
+                    <td>{{ item.duo }}</td>
+                    <td>{{ item.infok }}</td>
+                    <td>{{ item.nafl_roza }}</td>
+                    <td>{{ item.misvak }}</td>
+                    <td class="fw-bold text-success">{{ item.total_points }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="14" class="text-center text-muted py-3">
+                        Нет данных
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
+
             </table>
         </div>
     </div>
+
 </div>
 
-{% endblock content %}
+{% endblock %}
